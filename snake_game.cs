@@ -18,6 +18,7 @@ namespace Snake
         {
             
             var settings = new GameSettings(32, 16, 500, 5);
+            var renderer = new ConsoleGameRenderer(settings);
 
             ConfigureConsole(settings);
 
@@ -177,6 +178,80 @@ namespace Snake
             while (snake.Contains(food));
 
             return food;
+        }
+    }
+
+    internal sealed class ConsoleGameRenderer
+    {
+        private const char Block = '■';
+        private readonly GameSettings settings;
+
+        public ConsoleGameRenderer(GameSettings settings)
+        {
+            this.settings = settings;
+        }
+
+        public void Render(SnakeGame game)
+        {
+            Console.Clear();
+
+            DrawBorder();
+            DrawFood(game.Food);
+            DrawSnake(game);
+        }
+
+        public void RenderGameOver(int score)
+        {
+            Console.Clear();
+
+            string message = "Game over, Score: " + score;
+            int x = Math.Max(0, (settings.Width - message.Length) / 2);
+            int y = settings.Height / 2;
+
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.SetCursorPosition(x, y);
+            Console.Write(message);
+            Console.ResetColor();
+
+            Console.SetCursorPosition(0, settings.Height - 1);
+        }
+
+        private void DrawBorder()
+        {
+            for (int x = 0; x < settings.Width; x++)
+            {
+                DrawCell(new Cell(x, 0), ConsoleColor.White);
+                DrawCell(new Cell(x, settings.Height - 1), ConsoleColor.White);
+            }
+
+            for (int y = 0; y < settings.Height; y++)
+            {
+                DrawCell(new Cell(0, y), ConsoleColor.White);
+                DrawCell(new Cell(settings.Width - 1, y), ConsoleColor.White);
+            }
+        }
+
+        private void DrawFood(Cell food)
+        {
+            DrawCell(food, ConsoleColor.Cyan);
+        }
+
+        private void DrawSnake(SnakeGame game)
+        {
+            foreach (Cell bodyPart in game.SnakeCells.Skip(1))
+            {
+                DrawCell(bodyPart, ConsoleColor.Green);
+            }
+
+            DrawCell(game.Head, ConsoleColor.Red);
+        }
+
+        private void DrawCell(Cell cell, ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+            Console.SetCursorPosition(cell.X, cell.Y);
+            Console.Write(Block);
+            Console.ResetColor();
         }
     }
 }
