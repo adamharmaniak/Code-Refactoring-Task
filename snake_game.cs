@@ -143,7 +143,7 @@ namespace Snake
             Console.CursorVisible = false;
         }
 
-        class pixel
+        class Cell
         {
             public int xpos { get; set; }
             public int ypos { get; set; }
