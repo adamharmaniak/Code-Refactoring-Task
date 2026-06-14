@@ -5,8 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 ///█ ■
 ////https://www.youtube.com/watch?v=SGZgvMwjq2U
@@ -27,11 +25,19 @@ namespace Snake
 
             while (!game.IsGameOver)
             {
-                
+                renderer.Render(game);
+
+                Direction nextDirection = input.ReadDirectionFor(
+                    settings.FrameDelayMilliseconds,
+                    game.Direction
+                );
+
+                game.ChangeDirection(nextDirection);
+                game.Update();
             }
-            Console.SetCursorPosition(screenwidth / 5, screenheight / 2);
-            Console.WriteLine("Game over, Score: "+ score);
-            Console.SetCursorPosition(screenwidth / 5, screenheight / 2 +1);
+            
+            renderer.RenderGameOver(game.Score);
+            Console.ReadKey(true);
         }
 
         private static void ConfigureConsole(GameSettings settings)
@@ -40,30 +46,22 @@ namespace Snake
             Console.WindowHeight = settings.Height;
             Console.CursorVisible = false;
         }
-
-        class Cell
-        {
-            public int xpos { get; set; }
-            public int ypos { get; set; }
-            public ConsoleColor schermkleur { get; set; }
-        }
     }
 
     internal sealed class GameSettings
+    {
+        public GameSettings(int width, int height, int frameDelayMilliseconds, int initialScore)
         {
-            public GameSettings(int width, int height, int frameDelayMilliseconds, int initialScore)
-            {
-                Width = width;
-                Height = height;
-                FrameDelayMilliseconds = frameDelayMilliseconds;
-                InitialScore = initialScore;
-            }
-
-            public int Width { get; }
-            public int Height { get; }
-            public int FrameDelayMilliseconds { get; }
-            public int InitialScore { get; }
+            Width = width;
+            Height = height;
+            FrameDelayMilliseconds = frameDelayMilliseconds;
+            InitialScore = initialScore;
         }
+        public int Width { get; }
+        public int Height { get; }
+        public int FrameDelayMilliseconds { get; }
+        public int InitialScore { get; }
+    }
 
     internal sealed class SnakeGame
     {
@@ -89,7 +87,7 @@ namespace Snake
         public Cell Food { get; private set; }
         public Cell Head => snake.First.Value;
         public IEnumerable<Cell> SnakeCells => snake;
-
+    
         public void ChangeDirection(Direction newDirection)
         {
             if (!DirectionHelper.AreOpposite(Direction, newDirection))
@@ -314,6 +312,52 @@ namespace Snake
                     direction = Direction.Right;
                     return false;
             }
+        }
+    }
+
+    internal static class DirectionHelper
+    {
+        public static bool AreOpposite(Direction first, Direction second)
+        {
+            return first == Direction.Up && second == Direction.Down
+                || first == Direction.Down && second == Direction.Up
+                || first == Direction.Left && second == Direction.Right
+                || first == Direction.Right && second == Direction.Left;
+        }
+    }
+
+    internal enum Direction
+    {
+        Up,
+        Down,
+        Left,
+        Right
+    }
+
+    internal struct Cell : IEquatable<Cell>
+    {
+        public Cell(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        public int X { get; }
+        public int Y { get; }
+
+        public bool Equals(Cell other)
+        {
+            return X == other.X && Y == other.Y;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Cell other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return (X * 397) ^ Y;
         }
     }
 }
