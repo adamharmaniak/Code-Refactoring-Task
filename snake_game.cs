@@ -19,6 +19,7 @@ namespace Snake
             
             var settings = new GameSettings(32, 16, 500, 5);
             var renderer = new ConsoleGameRenderer(settings);
+            var input = new ConsoleInputReader();
 
             ConfigureConsole(settings);
 
@@ -252,6 +253,67 @@ namespace Snake
             Console.SetCursorPosition(cell.X, cell.Y);
             Console.Write(Block);
             Console.ResetColor();
+        }
+    }
+
+    internal sealed class ConsoleInputReader
+    {
+        public Direction ReadDirectionFor(int milliseconds, Direction currentDirection)
+        {
+            Direction selectedDirection = currentDirection;
+            bool directionChanged = false;
+            DateTime endTime = DateTime.Now.AddMilliseconds(milliseconds);
+
+            while (DateTime.Now < endTime)
+            {
+                if (!Console.KeyAvailable)
+                {
+                    Thread.Sleep(10);
+                    continue;
+                }
+
+                ConsoleKey key = Console.ReadKey(true).Key;
+
+                if (directionChanged)
+                {
+                    continue;
+                }
+
+                if (TryMapKeyToDirection(key, out Direction newDirection)
+                    && !DirectionHelper.AreOpposite(currentDirection, newDirection))
+                {
+                    selectedDirection = newDirection;
+                    directionChanged = true;
+                }
+            }
+
+            return selectedDirection;
+        }
+
+        private static bool TryMapKeyToDirection(ConsoleKey key, out Direction direction)
+        {
+            switch (key)
+            {
+                case ConsoleKey.UpArrow:
+                    direction = Direction.Up;
+                    return true;
+
+                case ConsoleKey.DownArrow:
+                    direction = Direction.Down;
+                    return true;
+
+                case ConsoleKey.LeftArrow:
+                    direction = Direction.Left;
+                    return true;
+
+                case ConsoleKey.RightArrow:
+                    direction = Direction.Right;
+                    return true;
+
+                default:
+                    direction = Direction.Right;
+                    return false;
+            }
         }
     }
 }
