@@ -12,16 +12,16 @@ using System.Threading;
 ////https://www.youtube.com/watch?v=SGZgvMwjq2U
 namespace Snake
 {
-    class Program
+    static class Program
     {
-        static void Main(string[] args)
+        private static void Main()
         {
-            Console.WindowHeight = 16;
-            Console.WindowWidth = 32;
+            
+            var settings = new GameSettings(32, 16, 500, 5);
+            
             int screenwidth = Console.WindowWidth;
             int screenheight = Console.WindowHeight;
             Random randomnummer = new Random();
-            int score = 5;
             int gameover = 0;
             pixel hoofd = new pixel();
             hoofd.xpos = screenwidth/2;
@@ -147,6 +147,23 @@ namespace Snake
             Console.WriteLine("Game over, Score: "+ score);
             Console.SetCursorPosition(screenwidth / 5, screenheight / 2 +1);
         }
+
+        internal sealed class GameSettings
+        {
+            public GameSettings(int width, int height, int frameDelayMilliseconds, int initialScore)
+            {
+                Width = width;
+                Height = height;
+                FrameDelayMilliseconds = frameDelayMilliseconds;
+                InitialScore = initialScore;
+            }
+
+            public int Width { get; }
+            public int Height { get; }
+            public int FrameDelayMilliseconds { get; }
+            public int InitialScore { get; }
+        }
+
         class pixel
         {
             public int xpos { get; set; }
